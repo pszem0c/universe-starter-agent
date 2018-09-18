@@ -21,6 +21,8 @@ def create_env(env_id, client_id, remotes, **kwargs):
         return create_flash_env(env_id, client_id, remotes, **kwargs)
     elif spec.tags.get('atari', False) and spec.tags.get('vnc', False):
         return create_vncatari_env(env_id, client_id, remotes, **kwargs)
+    elif 'classic_control' in spec._entry_point:
+        return create_classic_control(env_id)
     else:
         # Assume atari.
         assert "." not in env_id  # universe environments have dots in names.
@@ -76,6 +78,9 @@ def create_atari_env(env_id):
     env = AtariRescale42x42(env)
     env = DiagnosticsInfo(env)
     env = Unvectorize(env)
+    return env
+def create_classic_control(env_id):
+    env = gym.make(env_id)
     return env
 
 def DiagnosticsInfo(env, *args, **kwargs):
