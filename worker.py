@@ -8,6 +8,8 @@ import sys, signal
 import time
 import os
 from a3c import A3C
+from simplea3c import SimpleA3C
+
 from envs import create_env
 import distutils.version
 use_tf12_api = distutils.version.LooseVersion(tf.VERSION) >= distutils.version.LooseVersion('0.12.0')
@@ -24,7 +26,7 @@ class FastSaver(tf.train.Saver):
 
 def run(args, server):
     env = create_env(args.env_id, client_id=str(args.task), remotes=args.remotes)
-    trainer = A3C(env, args.task, args.visualise)
+    trainer = SimpleA3C(env, args.task, args.visualise)
 
     # Variable names that start with "local" are not saved in checkpoints.
     if use_tf12_api:

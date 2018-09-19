@@ -81,6 +81,9 @@ def create_atari_env(env_id):
     return env
 def create_classic_control(env_id):
     env = gym.make(env_id)
+    env = Vectorize(env)
+    env = DiagnosticsInfo(env)
+    env = Unvectorize(env)
     return env
 
 def DiagnosticsInfo(env, *args, **kwargs):
