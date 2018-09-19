@@ -44,6 +44,27 @@ def categorical_sample(logits, d):
     value = tf.squeeze(tf.multinomial(logits - tf.reduce_max(logits, [1], keep_dims=True), 1), [1])
     return tf.one_hot(value, d)
 
+class SimplePolicy(object):
+    def __init__(self, ob_space, ac_space):
+        self.x = x = tf.placeholder(tf.float32, [None] + list(ob_space))
+
+        x = tf.nn.relu(linear(x, 20, "l1", tf.contrib.layers.xavier_iitializer())) 
+
+        self.logits = linear(x, ac_space, "action", normalized_columns_initializer(0.01))
+        self.vf = tf.reshape(linear(x, 1, "value", normalized_columns_initializer(1.0)), [-1])
+        self.state_out = [lstm_c[:1, :], lstm_h[:1, :]]
+        self.sample = categorical_sample(self.logits, ac_space)[0, :]
+        self.var_list = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, tf.get_variable_scope().name)
+
+    def act(self, ob, c, h):
+        sess = tf.get_default_session()
+        return sess.run([self.sample, self.vf],
+                        {self.x: [ob]})
+
+    def value(self, ob, c, h):
+        sess = tf.get_default_session()
+        return sess.run(self.vf, {self.x: [ob]})[0]
+
 class LSTMPolicy(object):
     def __init__(self, ob_space, ac_space):
         self.x = x = tf.placeholder(tf.float32, [None] + list(ob_space))
